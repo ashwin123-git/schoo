@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business App - Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-emerald-100 min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-2xl">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Create Account</h1>
+                <p class="text-gray-600 mt-2">Join our business community</p>
+            </div>
+
+            <div id="signupForm" class="space-y-6">
+                <!-- Step 1: Registration -->
+                <div id="step1" class="space-y-4">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Step 1: Create Your Account</h2>
+                    
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="John Doe">
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="you@example.com">
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="password" name="password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="••••••••">
+                    </div>
+
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="••••••••">
+                    </div>
+
+                    <button type="button" id="registerBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Continue to Verification</button>
+                </div>
+
+                <!-- Step 2: Email Verification -->
+                <div id="step2" class="space-y-4 hidden">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Step 2: Enter Verification Code</h2>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-sm text-blue-800">Verification code sent for <span id="verifyEmail" class="font-semibold"></span></p>
+                        <p class="text-xs text-blue-700 mt-2">Check the developer console (F12) in the server terminal for your code</p>
+                    </div>
+
+                    <div>
+                        <label for="verificationCode" class="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
+                        <input type="text" id="verificationCode" name="verificationCode" placeholder="000000" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="button" id="backBtn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-200">Back</button>
+                        <button type="button" id="verifyBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Verify</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="message" class="mt-4 text-center"></div>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">Already have an account? <a href="/api/auth/signin" class="text-green-600 hover:text-green-800 font-semibold">Sign in here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userEmail = '';
+        const messageDiv = document.getElementById('message');
+
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!email || !password) {
+                messageDiv.innerHTML = '<p class="text-red-600 font-semibold">Please fill in all fields</p>';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                messageDiv.innerHTML = '<p class="text-red-600 font-semibold">Passwords do not match</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password, full_name: fullName })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    userEmail = email;
+                    document.getElementById('verifyEmail').textContent = email;
+                    document.getElementById('step1').classList.add('hidden');
+                    document.getElementById('step2').classList.remove('hidden');
+                    messageDiv.innerHTML = '<p class="text-green-600 font-semibold">Check your email for verification code</p>';
+                } else {
+                    messageDiv.innerHTML = `<p class="text-red-600 font-semibold">${data.error}</p>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<p class="text-red-600 font-semibold">An error occurred. Please try again.</p>`;
+            }
+        });
+
+        document.getElementById('backBtn').addEventListener('click', () => {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            messageDiv.innerHTML = '';
+        });
+
+        document.getElementById('verifyBtn').addEventListener('click', async () => {
+            const code = document.getElementById('verificationCode').value;
+
+            if (!code) {
+                messageDiv.innerHTML = '<p class="text-red-600 font-semibold">Please enter verification code</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/verify-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: userEmail, code })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.innerHTML = '<p class="text-green-600 font-semibold">Email verified! Redirecting to sign in...</p>';
+                    setTimeout(() => {
+                        window.location.href = '/api/auth/signin';
+                    }, 2000);
+                } else {
+                    messageDiv.innerHTML = `<p class="text-red-600 font-semibold">${data.error}</p>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<p class="text-red-600 font-semibold">An error occurred. Please try again.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMNC - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-gray-800">AMNC Official App</h1>
+            </div>
+            <nav class="mt-6">
+                <a href="#dashboard" onclick="showTab('dashboard')" class="sidebar-link block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium active">📊 Dashboard</a>
+                <a href="#logs" onclick="showTab('logs')" class="sidebar-link block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium">📋 Business Logs</a>
+                <a href="#chat" onclick="showTab('chat')" class="sidebar-link block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium">💬 Group Chat</a>
+                <a href="#" onclick="logout()" class="sidebar-link block px-6 py-3 text-red-600 hover:bg-red-50 font-medium mt-6">🚪 Logout</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1">
+            <!-- Top Bar -->
+            <div class="bg-white shadow">
+                <div class="px-8 py-4 flex justify-between items-center">
+                    <h2 id="pageTitle" class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                    <div id="userInfo" class="text-right">
+                        <p id="userName" class="text-gray-600 text-sm">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-8">
+                <!-- Dashboard Tab -->
+                <div id="dashboard" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+                            <p class="text-sm font-semibold opacity-90">Total Income</p>
+                            <p id="totalIncome" class="text-3xl font-bold mt-2">₹0.00</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-lg p-6 text-white">
+                            <p class="text-sm font-semibold opacity-90">Total Expense</p>
+                            <p id="totalExpense" class="text-3xl font-bold mt-2">₹1604.00</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+                            <p class="text-sm font-semibold opacity-90">Balance</p>
+                            <p id="totalBalance" class="text-3xl font-bold mt-2">₹1604.00</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <button onclick="showTab('logs')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">Add Income/Expense</button>
+                            <button onclick="exportPDF()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition">Export PDF</button>
+                            <button onclick="showTab('chat')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition">Go to Chat</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Logs Tab -->
+                <div id="logs" class="tab-content hidden">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Business Logs</h3>
+                        
+                        <!-- Add Log Form -->
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <h4 class="font-semibold text-gray-700 mb-4">Add New Log</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                                    <select id="logType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="income">Income</option>
+                                        <option value="expense">Expense</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Amount (₹)</label>
+                                    <input type="number" id="logAmount" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                    <input type="text" id="logDescription" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Consulting fee">
+                                </div>
+                                <div class="flex items-end">
+                                    <button onclick="addLog()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">Add</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                            <h4 class="font-semibold text-gray-700 mb-3">Filters</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                                    <input type="date" id="filterStartDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                                    <input type="date" id="filterEndDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                                    <select id="filterType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">All Types</option>
+                                        <option value="income">Income</option>
+                                        <option value="expense">Expense</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-end gap-2">
+                                    <button onclick="filterLogs()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition">Filter</button>
+                                    <button onclick="resetFilters()" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg transition">Reset</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logs Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-100 border-b-2 border-gray-200">
+                                    <tr>
+                                        <th class="px-6 py-3 font-semibold text-gray-700">Date</th>
+                                        <th class="px-6 py-3 font-semibold text-gray-700">Type</th>
+                                        <th class="px-6 py-3 font-semibold text-gray-700">Amount</th>
+                                        <th class="px-6 py-3 font-semibold text-gray-700">Added By</th>
+                                        <th class="px-6 py-3 font-semibold text-gray-700">Description</th>
+                                        <th class="px-6 py-3 font-semibold text-gray-700">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logsTable">
+                                    <tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Tab -->
+                <div id="chat" class="tab-content hidden">
+                    <div class="bg-white rounded-lg shadow h-96 md:h-screen md:rounded-lg flex flex-col">
+                        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6 rounded-t-lg">
+                            <h3 class="text-lg font-semibold">Business Meeting Chat</h3>
+                            <p class="text-sm opacity-90">Real-time messaging for business discussions</p>
+                        </div>
+                        
+                        <div id="messagesContainer" class="flex-1 overflow-y-auto p-6 space-y-4">
+                            <p class="text-center text-gray-500">Loading messages...</p>
+                        </div>
+                        
+                        <div class="border-t border-gray-200 p-4">
+                            <div class="flex gap-2">
+                                <input type="text" id="messageInput" placeholder="Type your message..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <button onclick="sendMessage()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg transition">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        let currentUser = null;
+
+        // Initialize
+        async function init() {
+            const token = localStorage.getItem('access_token');
+            console.log('Token retrieved:', token ? 'Yes' : 'No');
+            
+            if (!token) {
+                console.log('No token found, redirecting to signin');
+                window.location.href = '/api/auth/signin';
+                return;
+            }
+
+            // Load user info
+            try {
+                console.log('Loading user info with token...');
+                document.getElementById('userName').textContent = 'Welcome!';
+            } catch (error) {
+                console.error('Error loading user:', error);
+            }
+
+            // Load initial data
+            console.log('Loading dashboard data...');
+            await loadDashboard();
+            await loadLogs();
+            await loadMessages();
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all sidebar links
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('bg-blue-100', 'text-blue-600');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.remove('hidden');
+
+            // Add active class to clicked link
+            if (event && event.target) {
+                event.target.classList.add('bg-blue-100', 'text-blue-600');
+            }
+
+            // Update page title
+            const titles = {
+                'dashboard': 'Dashboard',
+                'logs': 'Business Logs',
+                'chat': 'Group Chat'
+            };
+            document.getElementById('pageTitle').textContent = titles[tabName] || 'Dashboard';
+
+            // Reload data for tab
+            if (tabName === 'logs') {
+                loadLogs();
+            } else if (tabName === 'chat') {
+                loadMessages();
+            }
+        }
+
+        async function loadDashboard() {
+            const token = localStorage.getItem('access_token');
+            console.log('Loading dashboard with token:', token ? 'Yes' : 'No');
+            
+            try {
+                const response = await fetch(`${API_URL}/logs/summary`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Dashboard response status:', response.status);
+                const data = await response.json();
+                console.log('Dashboard data:', data);
+                
+                if (response.ok) {
+                    document.getElementById('totalIncome').textContent = `₹${parseFloat(data.total_income).toFixed(2)}`;
+                    document.getElementById('totalExpense').textContent = `₹${parseFloat(data.total_expense).toFixed(2)}`;
+                    document.getElementById('totalBalance').textContent = `₹${parseFloat(data.total_balance).toFixed(2)}`;
+                } else {
+                    console.error('Dashboard error:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        async function loadLogs() {
+            const token = localStorage.getItem('access_token');
+            console.log('Loading logs with token:', token ? 'Yes' : 'No');
+            
+            try {
+                const response = await fetch(`${API_URL}/logs/list`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Logs response status:', response.status);
+                const data = await response.json();
+                console.log('Logs data:', data);
+                
+                if (response.ok) {
+                    const tbody = document.getElementById('logsTable');
+                    
+                    if (data.logs.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No logs found</td></tr>';
+                        return;
+                    }
+
+                    tbody.innerHTML = data.logs.map(log => `
+                        <tr class="border-b border-gray-200 hover:bg-gray-50">
+                            <td class="px-6 py-4">${new Date(log.created_at).toLocaleString()}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-3 py-1 rounded-full text-sm font-semibold ${log.log_type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${log.log_type.charAt(0).toUpperCase() + log.log_type.slice(1)}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 font-semibold">₹${parseFloat(log.amount).toFixed(2)}</td>
+                            <td class="px-6 py-4">${log.created_by || 'Unknown'}</td>
+                            <td class="px-6 py-4">${log.description || '-'}</td>
+                            <td class="px-6 py-4">
+                                <button onclick="deleteLog(${log.id})" class="text-red-600 hover:text-red-800 font-semibold text-sm">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    console.error('Logs error:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading logs:', error);
+            }
+        }
+
+        async function addLog() {
+            const token = localStorage.getItem('access_token');
+            const type = document.getElementById('logType').value;
+            const amount = document.getElementById('logAmount').value;
+            const description = document.getElementById('logDescription').value;
+
+            if (!amount) {
+                alert('Please enter an amount');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/logs/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        log_type: type,
+                        amount: parseFloat(amount),
+                        description: description
+                    })
+                });
+
+                if (response.ok) {
+                    // Clear form
+                    document.getElementById('logAmount').value = '';
+                    document.getElementById('logDescription').value = '';
+                    
+                    // Reload data
+                    await loadLogs();
+                    await loadDashboard();
+                    alert('Log added successfully!');
+                } else {
+                    alert('Error adding log');
+                }
+            } catch (error) {
+                console.error('Error adding log:', error);
+                alert('An error occurred');
+            }
+        }
+
+        async function deleteLog(logId) {
+            if (!confirm('Are you sure you want to delete this log?')) return;
+
+            const token = localStorage.getItem('access_token');
+            try {
+                const response = await fetch(`${API_URL}/logs/delete/${logId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    await loadLogs();
+                    await loadDashboard();
+                    alert('Log deleted successfully!');
+                }
+            } catch (error) {
+                console.error('Error deleting log:', error);
+            }
+        }
+
+        async function filterLogs() {
+            const token = localStorage.getItem('access_token');
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+            const type = document.getElementById('filterType').value;
+
+            let url = `${API_URL}/logs/list?`;
+            if (startDate) url += `start_date=${startDate}&`;
+            if (endDate) url += `end_date=${endDate}&`;
+            if (type) url += `log_type=${type}&`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('Filter response status:', response.status);
+                const data = await response.json();
+
+                if (response.ok) {
+                    const tbody = document.getElementById('logsTable');
+                    
+                    if (data.logs.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No logs found</td></tr>';
+                        return;
+                    }
+
+                    tbody.innerHTML = data.logs.map(log => `
+                        <tr class="border-b border-gray-200 hover:bg-gray-50">
+                            <td class="px-6 py-4">${new Date(log.created_at).toLocaleString()}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-3 py-1 rounded-full text-sm font-semibold ${log.log_type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${log.log_type.charAt(0).toUpperCase() + log.log_type.slice(1)}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 font-semibold">₹${parseFloat(log.amount).toFixed(2)}</td>
+                            <td class="px-6 py-4">${log.created_by || 'Unknown'}</td>
+                            <td class="px-6 py-4">${log.description || '-'}</td>
+                            <td class="px-6 py-4">
+                                <button onclick="deleteLog(${log.id})" class="text-red-600 hover:text-red-800 font-semibold text-sm">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    console.error('Filter error:', data.error);
+                }
+            } catch (error) {
+                console.error('Error filtering logs:', error);
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+            document.getElementById('filterType').value = '';
+            loadLogs();
+        }
+
+        async function exportPDF() {
+            const token = localStorage.getItem('access_token');
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+
+            let url = `${API_URL}/logs/export-pdf?`;
+            if (startDate) url += `start_date=${startDate}&`;
+            if (endDate) url += `end_date=${endDate}&`;
+
+            console.log('Exporting PDF with URL:', url);
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                console.log('Export response status:', response.status);
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `business_logs_${new Date().toISOString().slice(0, 10)}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(downloadUrl);
+                    document.body.removeChild(a);
+                } else {
+                    console.error('Export error status:', response.status);
+                }
+            } catch (error) {
+                console.error('Error exporting PDF:', error);
+                alert('Error exporting PDF');
+            }
+        }
+
+        async function loadMessages() {
+            const token = localStorage.getItem('access_token');
+            console.log('Loading messages with token:', token ? 'Yes' : 'No');
+            
+            try {
+                const response = await fetch(`${API_URL}/chat/messages`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('Messages response status:', response.status);
+                const data = await response.json();
+                console.log('Messages data:', data);
+
+                if (response.ok) {
+                    const container = document.getElementById('messagesContainer');
+
+                    if (data.messages.length === 0) {
+                        container.innerHTML = '<p class="text-center text-gray-500">No messages yet. Start the conversation!</p>';
+                        return;
+                    }
+
+                    container.innerHTML = data.messages.map(msg => `
+                        <div class="bg-gray-100 rounded-lg p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-semibold text-gray-800">${msg.user_email}</p>
+                                    <p class="text-gray-700 mt-1">${msg.content}</p>
+                                </div>
+                                <span class="text-xs text-gray-500">${new Date(msg.created_at).toLocaleTimeString()}</span>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    // Scroll to bottom
+                    container.scrollTop = container.scrollHeight;
+                } else {
+                    console.error('Messages error:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        async function sendMessage() {
+            const token = localStorage.getItem('access_token');
+            const content = document.getElementById('messageInput').value;
+
+            console.log('Sending message...');
+            console.log('Token available:', token ? `Yes (${token.substring(0, 20)}...)` : 'No');
+            console.log('Message content:', content);
+
+            if (!content.trim()) {
+                alert('Please enter a message');
+                return;
+            }
+
+            if (!token) {
+                alert('Error: No authentication token. Please sign in again.');
+                window.location.href = '/api/auth/signin';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/chat/send`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                console.log('Send message response status:', response.status);
+
+                if (response.ok) {
+                    console.log('Message sent successfully');
+                    document.getElementById('messageInput').value = '';
+                    await loadMessages();
+                } else {
+                    const error = await response.json();
+                    console.error('Send message error:', error);
+                    alert('Error sending message: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Error sending message: ' + error.message);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.href = '/api/auth/signin';
+        }
+
+        // Auto-refresh messages every 3 seconds
+        setInterval(() => {
+            if (!document.getElementById('chat').classList.contains('hidden')) {
+                loadMessages();
+            }
+        }, 3000);
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>
