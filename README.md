@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 # Business App
 
 A comprehensive Flask-based business management application with authentication, expense tracking, and team communication features.
